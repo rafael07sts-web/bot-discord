@@ -1,4 +1,16 @@
 require('dotenv').config();
+// ===== SERVIDOR HTTP PARA RENDER (NÃO REMOVER) =====
+const http = require("http");
+const PORT = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Bot está online!");
+}).listen(PORT, () => {
+  console.log("HTTP ativo na porta", PORT);
+});
+// ====================================================
+
 const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js');
 
 const client = new Client({
