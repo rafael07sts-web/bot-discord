@@ -112,3 +112,7 @@ client.on("messageCreate", async (message) => {
 });
 
 client.login(process.env.TOKEN);
+
+setInterval(() => {
+    console.log("Mantendo o bot ativo...");
+}, 280000);
