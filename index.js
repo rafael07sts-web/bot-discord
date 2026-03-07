@@ -420,9 +420,7 @@ client.on("messageCreate", async (message) => {
       return;
     } catch (e) {
       console.error(e);
-      return message.reply(err("Purge failed. Messages older than 14 days cannot be bulk deleted."));
-    }
-  }
+      return message.channel.send("❌ Purge failed. Messages older than 14 days cannot be deleted.");
 });
 
 client.login(process.env.TOKEN);
