@@ -421,6 +421,6 @@ client.on("messageCreate", async (message) => {
     } catch (e) {
       console.error(e);
       return message.channel.send("❌ Purge failed. Messages older than 14 days cannot be deleted.");
-});
+}
 
 client.login(process.env.TOKEN);
