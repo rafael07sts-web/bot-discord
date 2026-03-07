@@ -12,6 +12,23 @@ http.createServer((req, res) => {
   console.log("HTTP running on port", PORT);
 });
 
+async function testToken() {
+  try {
+    const response = await fetch("https://discord.com/api/v10/users/@me", {
+      headers: {
+        Authorization: `Bot ${process.env.TOKEN}`,
+      },
+    });
+
+    console.log("TOKEN TEST STATUS:", response.status);
+
+    const text = await response.text();
+    console.log("TOKEN TEST RESPONSE:", text);
+  } catch (error) {
+    console.error("TOKEN TEST ERROR:", error);
+  }
+}
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
@@ -35,6 +52,8 @@ process.on("uncaughtException", (error) => {
 console.log("Starting login...");
 console.log("TOKEN exists:", !!process.env.TOKEN);
 
+testToken();
+
 client.login(process.env.TOKEN)
   .then(() => {
     console.log("LOGIN PROMISE RESOLVED");
@@ -42,3 +61,7 @@ client.login(process.env.TOKEN)
   .catch((error) => {
     console.error("LOGIN FAILED:", error);
   });
+
+setTimeout(() => {
+  console.log("Login still pending after 20 seconds...");
+}, 20000);
