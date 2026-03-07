@@ -35,6 +35,21 @@ const client = new Client({
 });
 
 client.once("ready", () => {
+client.on("error", (error) => {
+  console.error("Discord client error:", error);
+});
+
+client.on("warn", (warning) => {
+  console.warn("Discord client warning:", warning);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception:", error);
+});
   console.log(`Bot logged in as ${client.user.tag}`);
 });
 
@@ -481,4 +496,13 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(process.env.TOKEN);
+console.log("Starting Discord login...");
+console.log("TOKEN exists:", !!process.env.TOKEN);
+
+client.login(process.env.TOKEN)
+  .then(() => {
+    console.log("Login request sent successfully.");
+  })
+  .catch((error) => {
+    console.error("Login failed:", error);
+  });
