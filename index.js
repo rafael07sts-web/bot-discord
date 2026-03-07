@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const {
   Client,
   GatewayIntentBits,
@@ -77,10 +78,6 @@ function botCanManageRole(guild, role) {
   return me.roles.highest.position > role.position;
 }
 
-client.once("ready", () => {
-  console.log(`Bot logged in as ${client.user.tag}`);
-});
-
 client.on("messageCreate", async (message) => {
   if (!message.guild) return;
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
@@ -88,13 +85,18 @@ client.on("messageCreate", async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = (args.shift() || "").toLowerCase();
 
-  const canManageRoles = message.member.permissions.has(PermissionsBitField.Flags.ManageRoles);
-  const canManageMessages = message.member.permissions.has(PermissionsBitField.Flags.ManageMessages);
-  const canBan = message.member.permissions.has(PermissionsBitField.Flags.BanMembers);
-  const canManageChannels = message.member.permissions.has(PermissionsBitField.Flags.ManageChannels);
+  const canManageRoles = message.member.permissions.has(
+    PermissionsBitField.Flags.ManageRoles
+  );
+  const canBan = message.member.permissions.has(
+    PermissionsBitField.Flags.BanMembers
+  );
+  const canManageChannels = message.member.permissions.has(
+    PermissionsBitField.Flags.ManageChannels
+  );
 
   // =========================
-  // !help
+  // .help
   // =========================
   if (command === "help") {
     const text = [
@@ -108,31 +110,40 @@ client.on("messageCreate", async (message) => {
       `**${PREFIX}unban <userId> [reason]** → Unban a user by ID`,
       `**${PREFIX}lock** → Lock the current channel`,
       `**${PREFIX}unlock** → Unlock the current channel`,
-      `**${PREFIX}purge 1-100** → Delete recent messages in the current channel`,
     ].join("\n");
 
     return message.reply(info(text));
   }
 
   // =========================
-  // !member @user Name
+  // .member @user Name
   // =========================
   if (command === "member") {
-    if (!canManageRoles) return message.reply(err("You don't have permission (Manage Roles)."));
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
 
     const member = message.mentions.members.first();
-    if (!member) return message.reply(err("Usage: `!member @user Name`"));
+    if (!member) {
+      return message.reply(err("Usage: `.member @user Name`"));
+    }
 
     const newName = args.slice(1).join(" ");
     if (!newName) {
-      return message.reply(err("Please provide a name after the mention. Example: `!member @user Rafael`"));
+      return message.reply(
+        err("Please provide a name after the mention. Example: `.member @user Rafael`")
+      );
     }
 
     const role = roleById(message.guild, MEMBER_ROLE_ID);
-    if (!role) return message.reply(err("MEMBER role not found. Check MEMBER_ROLE_ID."));
+    if (!role) {
+      return message.reply(err("MEMBER role not found. Check MEMBER_ROLE_ID."));
+    }
 
     if (!botCanManageRole(message.guild, role)) {
-      return message.reply(err("My role must be ABOVE the MEMBER role in the server hierarchy."));
+      return message.reply(
+        err("My role must be ABOVE the MEMBER role in the server hierarchy.")
+      );
     }
 
     try {
@@ -140,33 +151,47 @@ client.on("messageCreate", async (message) => {
       await member.roles.add(role);
 
       return message.reply(
-        ok(`Set to **MEMBER**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗥𝗭 • ${newName} あ**`)
+        ok(
+          `Set to **MEMBER**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗥𝗭 • ${newName} あ**`
+        )
       );
     } catch (e) {
       console.error(e);
-      return message.reply(err("I couldn't change nickname or add the role. Check permissions and hierarchy."));
+      return message.reply(
+        err("I couldn't change nickname or add the role. Check permissions and hierarchy.")
+      );
     }
   }
 
   // =========================
-  // !ea @user Name
+  // .ea @user Name
   // =========================
   if (command === "ea") {
-    if (!canManageRoles) return message.reply(err("You don't have permission (Manage Roles)."));
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
 
     const member = message.mentions.members.first();
-    if (!member) return message.reply(err("Usage: `!ea @user Name`"));
+    if (!member) {
+      return message.reply(err("Usage: `.ea @user Name`"));
+    }
 
     const newName = args.slice(1).join(" ");
     if (!newName) {
-      return message.reply(err("Please provide a name after the mention. Example: `!ea @user Rafael`"));
+      return message.reply(
+        err("Please provide a name after the mention. Example: `.ea @user Rafael`")
+      );
     }
 
     const role = roleById(message.guild, EA_ROLE_ID);
-    if (!role) return message.reply(err("EA role not found. Check EA_ROLE_ID."));
+    if (!role) {
+      return message.reply(err("EA role not found. Check EA_ROLE_ID."));
+    }
 
     if (!botCanManageRole(message.guild, role)) {
-      return message.reply(err("My role must be ABOVE the EA role in the server hierarchy."));
+      return message.reply(
+        err("My role must be ABOVE the EA role in the server hierarchy.")
+      );
     }
 
     try {
@@ -174,28 +199,40 @@ client.on("messageCreate", async (message) => {
       await member.roles.add(role);
 
       return message.reply(
-        ok(`Set to **EA**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗘𝗔 • ${newName} ✰**`)
+        ok(
+          `Set to **EA**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗘𝗔 • ${newName} ✰**`
+        )
       );
     } catch (e) {
       console.error(e);
-      return message.reply(err("I couldn't change nickname or add the role. Check permissions and hierarchy."));
+      return message.reply(
+        err("I couldn't change nickname or add the role. Check permissions and hierarchy.")
+      );
     }
   }
 
   // =========================
-  // !vip @user
+  // .vip @user
   // =========================
   if (command === "vip") {
-    if (!canManageRoles) return message.reply(err("You don't have permission (Manage Roles)."));
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
 
     const member = message.mentions.members.first();
-    if (!member) return message.reply(err("Usage: `!vip @user`"));
+    if (!member) {
+      return message.reply(err("Usage: `.vip @user`"));
+    }
 
     const role = roleById(message.guild, VIP_ROLE_ID);
-    if (!role) return message.reply(err("VIP role not found. Check VIP_ROLE_ID."));
+    if (!role) {
+      return message.reply(err("VIP role not found. Check VIP_ROLE_ID."));
+    }
 
     if (!botCanManageRole(message.guild, role)) {
-      return message.reply(err("My role must be ABOVE the VIP role in the server hierarchy."));
+      return message.reply(
+        err("My role must be ABOVE the VIP role in the server hierarchy.")
+      );
     }
 
     try {
@@ -203,32 +240,42 @@ client.on("messageCreate", async (message) => {
       return message.reply(ok(`VIP role added to **${member.user.tag}**.`));
     } catch (e) {
       console.error(e);
-      return message.reply(err("I couldn't add the VIP role. Check permissions and hierarchy."));
+      return message.reply(
+        err("I couldn't add the VIP role. Check permissions and hierarchy.")
+      );
     }
   }
 
   // =========================
-  // !vs @user1 @user2 ...
+  // .vs @user1 @user2 ...
   // =========================
   if (command === "vs") {
-    if (!canManageRoles) return message.reply(err("You don't have permission (Manage Roles)."));
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
 
     const members = message.mentions.members;
-    if (!members.size) return message.reply(err("Usage: `!vs @user1 @user2 ...`"));
+    if (!members.size) {
+      return message.reply(err("Usage: `.vs @user1 @user2 ...`"));
+    }
 
     const role = roleById(message.guild, VS_ROLE_ID);
-    if (!role) return message.reply(err("VS role not found. Check VS_ROLE_ID."));
+    if (!role) {
+      return message.reply(err("VS role not found. Check VS_ROLE_ID."));
+    }
 
     if (!botCanManageRole(message.guild, role)) {
-      return message.reply(err("My role must be ABOVE the VS role in the server hierarchy."));
+      return message.reply(
+        err("My role must be ABOVE the VS role in the server hierarchy.")
+      );
     }
 
     let okCount = 0;
     let failCount = 0;
 
-    for (const m of members.values()) {
+    for (const member of members.values()) {
       try {
-        await m.roles.add(role);
+        await member.roles.add(role);
         okCount++;
       } catch {
         failCount++;
@@ -241,27 +288,35 @@ client.on("messageCreate", async (message) => {
   }
 
   // =========================
-  // !vsrm @user1 @user2 ...
+  // .vsrm @user1 @user2 ...
   // =========================
   if (command === "vsrm") {
-    if (!canManageRoles) return message.reply(err("You don't have permission (Manage Roles)."));
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
 
     const members = message.mentions.members;
-    if (!members.size) return message.reply(err("Usage: `!vsrm @user1 @user2 ...`"));
+    if (!members.size) {
+      return message.reply(err("Usage: `.vsrm @user1 @user2 ...`"));
+    }
 
     const role = roleById(message.guild, VS_ROLE_ID);
-    if (!role) return message.reply(err("VS role not found. Check VS_ROLE_ID."));
+    if (!role) {
+      return message.reply(err("VS role not found. Check VS_ROLE_ID."));
+    }
 
     if (!botCanManageRole(message.guild, role)) {
-      return message.reply(err("My role must be ABOVE the VS role in the server hierarchy."));
+      return message.reply(
+        err("My role must be ABOVE the VS role in the server hierarchy.")
+      );
     }
 
     let okCount = 0;
     let failCount = 0;
 
-    for (const m of members.values()) {
+    for (const member of members.values()) {
       try {
-        await m.roles.remove(role);
+        await member.roles.remove(role);
         okCount++;
       } catch {
         failCount++;
@@ -274,29 +329,37 @@ client.on("messageCreate", async (message) => {
   }
 
   // =========================
-  // !vsrall
+  // .vsrall
   // =========================
   if (command === "vsrall") {
-    if (!canManageRoles) return message.reply(err("You don't have permission (Manage Roles)."));
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
 
     const role = roleById(message.guild, VS_ROLE_ID);
-    if (!role) return message.reply(err("VS role not found. Check VS_ROLE_ID."));
+    if (!role) {
+      return message.reply(err("VS role not found. Check VS_ROLE_ID."));
+    }
 
     if (!botCanManageRole(message.guild, role)) {
-      return message.reply(err("My role must be ABOVE the VS role in the server hierarchy."));
+      return message.reply(
+        err("My role must be ABOVE the VS role in the server hierarchy.")
+      );
     }
 
     await message.guild.members.fetch().catch(() => null);
 
     const membersWithVS = role.members;
-    if (!membersWithVS.size) return message.reply(info("No one currently has the VS role."));
+    if (!membersWithVS.size) {
+      return message.reply(info("No one currently has the VS role."));
+    }
 
     let okCount = 0;
     let failCount = 0;
 
-    for (const m of membersWithVS.values()) {
+    for (const member of membersWithVS.values()) {
       try {
-        await m.roles.remove(role);
+        await member.roles.remove(role);
         okCount++;
         await new Promise((resolve) => setTimeout(resolve, 300));
       } catch {
@@ -305,42 +368,58 @@ client.on("messageCreate", async (message) => {
     }
 
     return message.reply(
-      ok(`Mass VS removal complete.\n✅ Removed: **${okCount}**\n❌ Failed: **${failCount}**`)
+      ok(
+        `Mass VS removal complete.\n✅ Removed: **${okCount}**\n❌ Failed: **${failCount}**`
+      )
     );
   }
 
   // =========================
-  // !ban @user [reason]
+  // .ban @user [reason]
   // =========================
   if (command === "ban") {
-    if (!canBan) return message.reply(err("You don't have permission (Ban Members)."));
+    if (!canBan) {
+      return message.reply(err("You don't have permission (Ban Members)."));
+    }
 
     const member = message.mentions.members.first();
-    if (!member) return message.reply(err("Usage: `!ban @user [reason]`"));
+    if (!member) {
+      return message.reply(err("Usage: `.ban @user [reason]`"));
+    }
 
     const reason = args.slice(1).join(" ") || "No reason provided";
 
     if (!member.bannable) {
-      return message.reply(err("I can't ban this user. They may have a higher role, or I may lack permissions."));
+      return message.reply(
+        err("I can't ban this user. They may have a higher role, or I may lack permissions.")
+      );
     }
 
     try {
       await member.ban({ reason });
-      return message.reply(ok(`Banned: **${member.user.tag}**\n📝 Reason: **${reason}**`));
+      return message.reply(
+        ok(`Banned: **${member.user.tag}**\n📝 Reason: **${reason}**`)
+      );
     } catch (e) {
       console.error(e);
-      return message.reply(err("Ban failed. Check my permissions and role hierarchy."));
+      return message.reply(
+        err("Ban failed. Check my permissions and role hierarchy.")
+      );
     }
   }
 
   // =========================
-  // !unban <userId> [reason]
+  // .unban <userId> [reason]
   // =========================
   if (command === "unban") {
-    if (!canBan) return message.reply(err("You don't have permission (Ban Members)."));
+    if (!canBan) {
+      return message.reply(err("You don't have permission (Ban Members)."));
+    }
 
     const userId = args[0];
-    if (!userId) return message.reply(err("Usage: `!unban <userId> [reason]`"));
+    if (!userId) {
+      return message.reply(err("Usage: `.unban <userId> [reason]`"));
+    }
 
     const reason = args.slice(1).join(" ") || "No reason provided";
 
@@ -348,18 +427,24 @@ client.on("messageCreate", async (message) => {
       await message.guild.bans.fetch(userId);
       await message.guild.bans.remove(userId, reason);
 
-      return message.reply(ok(`Unbanned: **${userId}**\n📝 Reason: **${reason}**`));
+      return message.reply(
+        ok(`Unbanned: **${userId}**\n📝 Reason: **${reason}**`)
+      );
     } catch (e) {
       console.error(e);
-      return message.reply(err("Unban failed. Make sure the ID is correct and the user is banned."));
+      return message.reply(
+        err("Unban failed. Make sure the ID is correct and the user is banned.")
+      );
     }
   }
 
   // =========================
-  // !lock
+  // .lock
   // =========================
   if (command === "lock") {
-    if (!canManageChannels) return message.reply(err("You don't have permission (Manage Channels)."));
+    if (!canManageChannels) {
+      return message.reply(err("You don't have permission (Manage Channels)."));
+    }
 
     try {
       await message.channel.permissionOverwrites.edit(
@@ -375,10 +460,12 @@ client.on("messageCreate", async (message) => {
   }
 
   // =========================
-  // !unlock
+  // .unlock
   // =========================
   if (command === "unlock") {
-    if (!canManageChannels) return message.reply(err("You don't have permission (Manage Channels)."));
+    if (!canManageChannels) {
+      return message.reply(err("You don't have permission (Manage Channels)."));
+    }
 
     try {
       await message.channel.permissionOverwrites.edit(
@@ -392,6 +479,6 @@ client.on("messageCreate", async (message) => {
       return message.reply(err("Failed to unlock this channel."));
     }
   }
-
+});
 
 client.login(process.env.TOKEN);
