@@ -33,6 +33,10 @@ const client = new Client({
   ],
 });
 
+client.once("ready", () => {
+  console.log(`Bot logged in as ${client.user.tag}`);
+});
+
 const PREFIX = ".";
 
 // ===== ROLE IDS =====
