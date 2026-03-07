@@ -393,34 +393,5 @@ client.on("messageCreate", async (message) => {
     }
   }
 
-  // =========================
-  // !purge 1-100
-  // =========================
-  if (command === "purge") {
-    if (!canManageMessages) return message.reply(err("You don't have permission (Manage Messages)."));
-
-    const amount = parseInt(args[0], 10);
-    if (!amount || amount < 1 || amount > 100) {
-      return message.reply(err("Usage: `!purge 1-100` (example: `!purge 50`)"));
-    }
-
-    try {
-      await message.delete().catch(() => null);
-
-      const deleted = await message.channel.bulkDelete(amount, true);
-
-      const replyMessage = await message.channel.send(
-        ok(`🧹 Deleted **${deleted.size}** messages.`)
-      );
-
-      setTimeout(() => {
-        replyMessage.delete().catch(() => null);
-      }, 5000);
-
-      return;
-    } catch (e) {
-      console.error(e);
-      return message.channel.send("❌ Purge failed. Messages older than 14 days cannot be deleted.");
-}
 
 client.login(process.env.TOKEN);
