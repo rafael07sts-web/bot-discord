@@ -33,7 +33,7 @@ const client = new Client({
   ],
 });
 
-const PREFIX = "!";
+const PREFIX = ".";
 
 // ===== ROLE IDS =====
 const MEMBER_ROLE_ID = "1215810801680519219";
