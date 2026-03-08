@@ -7,6 +7,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 
+// ===== HTTP SERVER FOR RENDER (DO NOT REMOVE) =====
 const http = require("http");
 const PORT = process.env.PORT || 10000;
 
@@ -16,10 +17,13 @@ http
     res.end("Bot is online!");
   })
   .listen(PORT, () => console.log("HTTP running on port", PORT));
+// ==================================================
 
+// ===== Anti-sleep (helps on Render free) =====
 setInterval(() => {
   console.log("Keeping the bot awake...");
 }, 280000);
+// ============================================
 
 const client = new Client({
   intents: [
@@ -38,6 +42,10 @@ client.on("error", (error) => {
   console.error("Discord client error:", error);
 });
 
+client.on("warn", (warning) => {
+  console.warn("Discord client warning:", warning);
+});
+
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled promise rejection:", reason);
 });
@@ -48,9 +56,12 @@ process.on("uncaughtException", (error) => {
 
 const PREFIX = ".";
 
+// ===== ROLE IDS =====
 const MEMBER_ROLE_ID = "1215810801680519219";
 const EA_ROLE_ID = "1209846373239885854";
 const VS_ROLE_ID = "1209847709557858334";
+const VIP_ROLE_ID = "1392629229727780974";
+// ====================
 
 function makeEmbed(type, title, description) {
   const embed = new EmbedBuilder()
@@ -93,8 +104,36 @@ client.on("messageCreate", async (message) => {
   const canManageRoles = message.member.permissions.has(
     PermissionsBitField.Flags.ManageRoles
   );
+  const canBan = message.member.permissions.has(
+    PermissionsBitField.Flags.BanMembers
+  );
+  const canManageChannels = message.member.permissions.has(
+    PermissionsBitField.Flags.ManageChannels
+  );
 
+  // =========================
+  // .help
+  // =========================
+  if (command === "help") {
+    const text = [
+      `**${PREFIX}member @user Name** → Set RZ nickname and add MEMBER role`,
+      `**${PREFIX}ea @user Name** → Set EA nickname and add EA role`,
+      `**${PREFIX}vip @user** → Add VIP role`,
+      `**${PREFIX}vs @user1 @user2 ...** → Add VS role to mentioned users`,
+      `**${PREFIX}vsrm @user1 @user2 ...** → Remove VS role from mentioned users`,
+      `**${PREFIX}vsrall** → Remove VS role from everyone who has it`,
+      `**${PREFIX}ban @user [reason]** → Ban a user`,
+      `**${PREFIX}unban <userId> [reason]** → Unban a user by ID`,
+      `**${PREFIX}lock** → Lock the current channel`,
+      `**${PREFIX}unlock** → Unlock the current channel`,
+    ].join("\n");
+
+    return message.reply(info(text));
+  }
+
+  // =========================
   // .member @user Name
+  // =========================
   if (command === "member") {
     if (!canManageRoles) {
       return message.reply(err("You don't have permission (Manage Roles)."));
@@ -128,7 +167,9 @@ client.on("messageCreate", async (message) => {
       await member.roles.add(role);
 
       return message.reply(
-        ok(`Set to **MEMBER**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗥𝗭 • ${newName} あ**`)
+        ok(
+          `Set to **MEMBER**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗥𝗭 • ${newName} あ**`
+        )
       );
     } catch (e) {
       console.error(e);
@@ -138,7 +179,9 @@ client.on("messageCreate", async (message) => {
     }
   }
 
+  // =========================
   // .ea @user Name
+  // =========================
   if (command === "ea") {
     if (!canManageRoles) {
       return message.reply(err("You don't have permission (Manage Roles)."));
@@ -172,7 +215,9 @@ client.on("messageCreate", async (message) => {
       await member.roles.add(role);
 
       return message.reply(
-        ok(`Set to **EA**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗘𝗔 • ${newName} ✰**`)
+        ok(
+          `Set to **EA**:\n👤 ${member.user.tag}\n🏷️ Nickname: **𝗘𝗔 • ${newName} ✰**`
+        )
       );
     } catch (e) {
       console.error(e);
@@ -182,7 +227,44 @@ client.on("messageCreate", async (message) => {
     }
   }
 
+  // =========================
+  // .vip @user
+  // =========================
+  if (command === "vip") {
+    if (!canManageRoles) {
+      return message.reply(err("You don't have permission (Manage Roles)."));
+    }
+
+    const member = message.mentions.members.first();
+    if (!member) {
+      return message.reply(err("Usage: `.vip @user`"));
+    }
+
+    const role = roleById(message.guild, VIP_ROLE_ID);
+    if (!role) {
+      return message.reply(err("VIP role not found. Check VIP_ROLE_ID."));
+    }
+
+    if (!botCanManageRole(message.guild, role)) {
+      return message.reply(
+        err("My role must be ABOVE the VIP role in the server hierarchy.")
+      );
+    }
+
+    try {
+      await member.roles.add(role);
+      return message.reply(ok(`VIP role added to **${member.user.tag}**.`));
+    } catch (e) {
+      console.error(e);
+      return message.reply(
+        err("I couldn't add the VIP role. Check permissions and hierarchy.")
+      );
+    }
+  }
+
+  // =========================
   // .vs @user1 @user2 ...
+  // =========================
   if (command === "vs") {
     if (!canManageRoles) {
       return message.reply(err("You don't have permission (Manage Roles)."));
@@ -221,7 +303,9 @@ client.on("messageCreate", async (message) => {
     );
   }
 
+  // =========================
   // .vsrm @user1 @user2 ...
+  // =========================
   if (command === "vsrm") {
     if (!canManageRoles) {
       return message.reply(err("You don't have permission (Manage Roles)."));
@@ -260,7 +344,9 @@ client.on("messageCreate", async (message) => {
     );
   }
 
+  // =========================
   // .vsrall
+  // =========================
   if (command === "vsrall") {
     if (!canManageRoles) {
       return message.reply(err("You don't have permission (Manage Roles)."));
@@ -302,6 +388,112 @@ client.on("messageCreate", async (message) => {
         `Mass VS removal complete.\n✅ Removed: **${okCount}**\n❌ Failed: **${failCount}**`
       )
     );
+  }
+
+  // =========================
+  // .ban @user [reason]
+  // =========================
+  if (command === "ban") {
+    if (!canBan) {
+      return message.reply(err("You don't have permission (Ban Members)."));
+    }
+
+    const member = message.mentions.members.first();
+    if (!member) {
+      return message.reply(err("Usage: `.ban @user [reason]`"));
+    }
+
+    const reason = args.slice(1).join(" ") || "No reason provided";
+
+    if (!member.bannable) {
+      return message.reply(
+        err("I can't ban this user. They may have a higher role, or I may lack permissions.")
+      );
+    }
+
+    try {
+      await member.ban({ reason });
+      return message.reply(
+        ok(`Banned: **${member.user.tag}**\n📝 Reason: **${reason}**`)
+      );
+    } catch (e) {
+      console.error(e);
+      return message.reply(
+        err("Ban failed. Check my permissions and role hierarchy.")
+      );
+    }
+  }
+
+  // =========================
+  // .unban <userId> [reason]
+  // =========================
+  if (command === "unban") {
+    if (!canBan) {
+      return message.reply(err("You don't have permission (Ban Members)."));
+    }
+
+    const userId = args[0];
+    if (!userId) {
+      return message.reply(err("Usage: `.unban <userId> [reason]`"));
+    }
+
+    const reason = args.slice(1).join(" ") || "No reason provided";
+
+    try {
+      await message.guild.bans.fetch(userId);
+      await message.guild.bans.remove(userId, reason);
+
+      return message.reply(
+        ok(`Unbanned: **${userId}**\n📝 Reason: **${reason}**`)
+      );
+    } catch (e) {
+      console.error(e);
+      return message.reply(
+        err("Unban failed. Make sure the ID is correct and the user is banned.")
+      );
+    }
+  }
+
+  // =========================
+  // .lock
+  // =========================
+  if (command === "lock") {
+    if (!canManageChannels) {
+      return message.reply(err("You don't have permission (Manage Channels)."));
+    }
+
+    try {
+      await message.channel.permissionOverwrites.edit(
+        message.guild.roles.everyone,
+        { SendMessages: false }
+      );
+
+      return message.reply(ok("🔒 Channel locked."));
+    } catch (e) {
+      console.error(e);
+      return message.reply(err("Failed to lock this channel."));
+    }
+  }
+
+  // =========================
+  // .unlock
+  // =========================
+  if (command === "unlock") {
+    if (!canManageChannels) {
+      return message.reply(err("You don't have permission (Manage Channels)."));
+    }
+
+    try {
+      await message.channel.permissionOverwrites.edit(
+        message.guild.roles.everyone,
+        { SendMessages: true }
+      );
+
+      return message.reply(ok("🔓 Channel unlocked."));
+    } catch (e) {
+      console.error(e);
+      return message.reply(err("Failed to unlock this channel."));
+    }
   }
 });
 
