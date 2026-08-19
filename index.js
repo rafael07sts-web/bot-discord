@@ -508,7 +508,7 @@ const loginTimeout = setTimeout(() => {
   console.error("LOGIN TIMEOUT: Discord login did not complete within 30 seconds.");
 }, 30000);
 
-client.login(process.env.TOKEN)
+client.on("debug", (info) => {
   console.log("[DISCORD DEBUG]", info);
 });
 
