@@ -509,6 +509,25 @@ const loginTimeout = setTimeout(() => {
 }, 30000);
 
 client.login(process.env.TOKEN)
+  client.on("debug", (info) => {
+  console.log("[DISCORD DEBUG]", info);
+});
+
+client.on("error", (error) => {
+  console.error("[DISCORD ERROR]", error);
+});
+
+client.on("shardError", (error) => {
+  console.error("[DISCORD SHARD ERROR]", error);
+});
+
+client.on("shardReconnecting", (id) => {
+  console.log("[DISCORD RECONNECTING]", id);
+});
+
+client.on("shardDisconnect", (event, id) => {
+  console.log("[DISCORD DISCONNECT]", id, event);
+});
   .then(() => {
     clearTimeout(loginTimeout);
     console.log("Login request sent successfully.");
