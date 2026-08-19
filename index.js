@@ -95,6 +95,9 @@ function botCanManageRole(guild, role) {
 }
 
 client.on("messageCreate", async (message) => {
+  console.log(
+  `[MESSAGE RECEIVED] ${message.content} | ${new Date().toISOString()}`
+);
   if (!message.guild) return;
   if (!message.content.startsWith(PREFIX) || message.author.bot) return;
 
