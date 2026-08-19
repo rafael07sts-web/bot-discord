@@ -504,10 +504,16 @@ console.log("Starting Discord login...");
 console.log("TOKEN exists:", !!process.env.TOKEN);
 console.log("TOKEN length:", process.env.TOKEN?.length);
 
+const loginTimeout = setTimeout(() => {
+  console.error("LOGIN TIMEOUT: Discord login did not complete within 30 seconds.");
+}, 30000);
+
 client.login(process.env.TOKEN)
   .then(() => {
+    clearTimeout(loginTimeout);
     console.log("Login request sent successfully.");
   })
   .catch((error) => {
+    clearTimeout(loginTimeout);
     console.error("Login failed:", error);
   });
