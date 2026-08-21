@@ -527,15 +527,23 @@ client.on("shardReconnecting", (id) => {
 client.on("shardDisconnect", (event, id) => {
   console.log("[DISCORD DISCONNECT]", id, event);
 });
-fetch("https://discord.com/api/v10/gateway")
-  .then(async (response) => {
-    console.log("[NETWORK TEST] Discord API status:", response.status);
-    console.log("[NETWORK TEST] Response:", await response.text());
-  })
-  .catch((error) => {
-    console.error("[NETWORK TEST] Failed:", error);
-  });
+
 client.login(process.env.TOKEN)
+  client.on("ready", (readyClient) => {
+  console.log("[GATEWAY TEST] READY:", readyClient.user.tag);
+});
+
+client.on("debug", (info) => {
+  console.log("[GATEWAY DEBUG]", info);
+});
+
+client.on("warn", (info) => {
+  console.warn("[GATEWAY WARN]", info);
+});
+
+client.on("invalidated", () => {
+  console.error("[GATEWAY INVALIDATED] Session invalidated.");
+});
   .then(() => {
     clearTimeout(loginTimeout);
     console.log("Login request sent successfully.");
