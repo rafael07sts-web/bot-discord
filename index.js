@@ -528,8 +528,7 @@ client.on("shardDisconnect", (event, id) => {
   console.log("[DISCORD DISCONNECT]", id, event);
 });
 
-client.login(process.env.TOKEN)
-  client.on("ready", (readyClient) => {
+client.on("ready", (readyClient) => {
   console.log("[GATEWAY TEST] READY:", readyClient.user.tag);
 });
 
@@ -544,6 +543,8 @@ client.on("warn", (info) => {
 client.on("invalidated", () => {
   console.error("[GATEWAY INVALIDATED] Session invalidated.");
 });
+
+client.login(process.env.TOKEN)
   .then(() => {
     clearTimeout(loginTimeout);
     console.log("Login request sent successfully.");
